@@ -24,6 +24,7 @@ static void init_irqs(void);
 static void init_radio_irq_gpio(void);
 static void init_PendSV_irq(void);
 static int find_unused_irq(int start);
+static void fake_PendSV_Handler(const void *args);
 
 /* PRIVATE GLOBALS ************************************************************/
 static irq_callback common_callback          = default_irq_callback;
@@ -67,7 +68,7 @@ void usens_trigger_radio_irq_callback(void)
 
 void usens_trigger_pendsv_callback(void)
 {
-    PendSV_Handler();
+    fake_PendSV_Handler(NULL);
 }
 
 /* PRIVATE FUNCTIONS **********************************************************/

@@ -41,7 +41,7 @@ static uint8_t *swc_memory_pool_ptr;
 static swc_hal_t hal;
 static swc_node_t *node;
 static swc_connection_t *rx_conn;
-static swc_connection_t *tx_conn;
+static volatile swc_connection_t *tx_conn;
 
 static uint32_t timeslot_us[] = SCHEDULE;
 static uint32_t channel_sequence[] = CHANNEL_SEQUENCE;

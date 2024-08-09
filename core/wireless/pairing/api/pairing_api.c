@@ -189,9 +189,9 @@ static void pairing_process(void)
         pairing_state_execute_current_state();
 
         /* Verify if the application defined timeout is reached. */
-        if (pairing_timer_is_timeout()) {
-            pairing_event_set_event(PAIRING_EVENT_TIMEOUT);
-        }
+        // if (pairing_timer_is_timeout()) {
+        //     pairing_event_set_event(PAIRING_EVENT_TIMEOUT);
+        // }
 
         /* Application level callback to perform application tasks. */
         if (application_callback != NULL) {

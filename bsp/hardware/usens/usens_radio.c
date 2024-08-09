@@ -167,23 +167,6 @@ extern void radio_spi_transfer_full_duplex_blocking(uint8_t *tx_data, uint8_t *r
 		return;
 	}
 
-    // struct spi_buf tx_buf = {.buf = tx_data++, .len = 1};
-    // struct spi_buf rx_buf = {.buf = rx_data++, .len = 1};
-
-    // struct spi_buf_set tx_set = { .buffers = &tx_buf, .count = 1 };
-    // struct spi_buf_set rx_set = { .buffers = &rx_buf, .count = 1 };
-    
-    // while(size--)
-    // {
-    //     if(spi_transceive(uwb_spi_dev, &spi_conf, &tx_set, &rx_set))
-    //     {
-    //         printk("%s: device failed to transfer_full_duplex.\n", uwb_spi_dev->name);
-    //     }
-    //     timer_delay_ms(1);
-    //     tx_buf.buf = tx_data++;
-    //     rx_buf.buf = rx_data++;
-    // }
-
 	struct spi_buf tx_buf = {.buf = tx_data, .len = size};
 	struct spi_buf rx_buf = {.buf = rx_data, .len = size};
 
@@ -233,10 +216,10 @@ extern void radio_callback_context_switch(void)
     // TODO: Find a way to trigger the interrupt instead of calling the IRQHandler directly
     //printk("%s: Context switch callback, used but not implemented.\n", uwb_spi_dev->name);
     //printk("PendSV_CONTEXT_SWITCH\n");
-    NVIC_SetPendingIRQ(fake_PendSV_IRQ);
+    //NVIC_SetPendingIRQ(fake_PendSV_IRQ);
     // SET_BIT(SCB->ICSR, SCB_ICSR_PENDSVSET_Msk);
     //PendSV_IRQn;
-    //usens_trigger_pendsv_callback();
+    usens_trigger_pendsv_callback();
     // Not implemented yet
 }
 
