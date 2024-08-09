@@ -1,0 +1,26 @@
+[
+    {
+        "name": "linux-spark-sdk",
+        "preferredGenerator": {
+            "name": "Ninja"
+        },
+        "compilers": {
+            "ASM": "arm-none-eabi-gcc",
+            "CC": "arm-none-eabi-gcc",
+            "CXX": "arm-none-eabi-g++"
+        },
+        "environmentSetupScript": "${workspaceFolder}/script/activate.sh"
+    },
+    {
+        "name": "windows-spark-sdk",
+        "preferredGenerator": {
+            "name": "Ninja"
+        },
+        "compilers": {
+            "ASM": "arm-none-eabi-gcc",
+            "CC": "arm-none-eabi-gcc",
+            "CXX": "arm-none-eabi-g++"
+        },
+        "environmentSetupScript": "${workspaceFolder}/script/activate.bat"
+    }
+]

@@ -1,0 +1,69 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Sleepdelay",
+            "type": "shell",
+            "command": "sleep 2",
+            "group": "none",
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared",
+                "focus": false
+            }
+        },
+        {
+            "label": "Build",
+            "type": "cmake",
+            "command": "build",
+            "group": "none",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared",
+                "focus": false
+            }
+        },
+        {
+            "label": "Select debug target 1",
+            "type": "shell",
+            "command": "grep -q '^TARGET1=' ${workspaceFolder}/.vscode/.debug.cfg && sed -i 's+^.*TARGET1=.*$+'TARGET1=${command:cmake.selectLaunchTarget}'+' ${workspaceFolder}/.vscode/.debug.cfg || echo 'TARGET1=${command:cmake.selectLaunchTarget}' >> ${workspaceFolder}/.vscode/.debug.cfg",
+            "group": "none",
+            "presentation": {
+                "reveal": "never",
+                "echo": false,
+                "focus": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Select debug target 2",
+            "type": "shell",
+            "command": "grep -q '^TARGET2=' ${workspaceFolder}/.vscode/.debug.cfg && sed -i 's+^.*TARGET2=.*$+'TARGET2=${command:cmake.selectLaunchTarget}'+' ${workspaceFolder}/.vscode/.debug.cfg || echo 'TARGET2=${command:cmake.selectLaunchTarget}' >> ${workspaceFolder}/.vscode/.debug.cfg",
+            "group": "none",
+            "presentation": {
+                "reveal": "never",
+                "echo": false,
+                "focus": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build and select second debug target",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Build",
+                "Select debug target 2"
+            ],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared",
+                "focus": false
+            }
+        }
+    ]
+}

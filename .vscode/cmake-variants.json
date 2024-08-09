@@ -1,0 +1,111 @@
+{
+  "bsp": {
+    "default": "EVK1.4",
+    "description": "Hardware kit to build",
+    "choices": {
+      "evk": {
+        "short": "EVK1.4",
+        "settings": {
+          "HARDWARE": "EVK"
+        }
+      }
+    }
+  },
+  "app": {
+    "default": "Hello World",
+    "description": "Application to build",
+    "choices": {
+      "audio-compression": {
+        "short": "Audio Compression",
+        "settings": {
+          "APP": "Audio-Compression"
+        }
+      },
+      "audio-high-resolution": {
+        "short": "Audio High Resolution",
+        "settings": {
+          "APP": "Audio-High-Res"
+        }
+      },
+      "audio-4-channel": {
+        "short": "Audio 4-Channel",
+        "settings": {
+          "APP": "Audio-4-Channel"
+        }
+      },
+      "audio-streaming": {
+        "short": "Audio Streaming",
+        "settings": {
+          "APP": "Audio-Streaming"
+        }
+      },
+      "audio-user-data": {
+        "short": "Audio User Data",
+        "settings": {
+          "APP": "Audio-User-Data"
+        }
+      },
+      "audio-mixer": {
+        "short": "Audio Mixer",
+        "settings": {
+          "APP": "Audio-Mixer"
+        }
+      },
+      "connection-priority": {
+        "short": "Connection Priority",
+        "settings": {
+          "APP": "Connection-Priority"
+        }
+      },
+      "fragmentation": {
+        "short": "Fragmentation",
+        "settings": {
+          "APP": "Fragmentation"
+        }
+      },
+      "hello-world": {
+        "short": "Hello World",
+        "settings": {
+          "APP": "Hello-World"
+        }
+      },
+      "pairing": {
+        "short": "Pairing Basic",
+        "settings": {
+          "APP": "Pairing-Basic"
+        }
+      },
+      "pairing-gaminghub": {
+        "short": "Pairing Gaming Hub",
+        "settings": {
+          "APP": "Pairing-Gaming-Hub",
+          "BOARD": "EVK"
+        }
+      },
+      "star-network": {
+        "short": "Star Network",
+        "settings": {
+          "APP": "Star-Network"
+        }
+      },
+      "BSP-validator": {
+        "short": "Validator",
+        "settings": {
+          "APP": "BSP-validator"
+        }
+      },
+      "ranging": {
+        "short": "Ranging",
+        "settings": {
+          "APP": "Ranging"
+        }
+      },
+      "all": {
+        "short": "All",
+        "settings": {
+          "APP": "All"
+        }
+      }
+    }
+  }
+}

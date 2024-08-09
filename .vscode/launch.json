@@ -1,0 +1,137 @@
+{
+  "configurations": [
+    {
+      "cwd": "${workspaceRoot}/build",
+      "executable": "${command:cmake.selectLaunchTarget}",
+      "name": "PyOCD STLINK STM32G4 1",
+      "device": "STM32G473RETx",
+      "request": "launch",
+      "type": "cortex-debug",
+      "runToEntryPoint": "main",
+      "servertype": "pyocd",
+      "svdFile": "${workspaceRoot}/.vscode/STM32G474xx.svd",
+      "serverArgs": [
+        "-t",
+        "stm32g473retx",
+        "-u",
+        "${input:stLinkNo1SerialNumber}",
+        "-O",
+        "rtos.enable=false",
+        "--project",
+        "${workspaceFolder}"
+      ],
+      "windows": {
+        "gdbPath": "${workspaceFolder}/.environment/envs/sdk/Library/bin/arm-none-eabi-gdb.exe"
+      },
+      "linux": {
+        "gdbPath": "${workspaceFolder}/.vscode/run-gdb.sh"
+      },
+      "osx": {
+        "gdbPath": "${workspaceFolder}/.vscode/run-gdb.sh"
+      },
+      "presentation": {
+        "group": "1 PyOCD"
+      }
+    },
+    {
+      "cwd": "${workspaceRoot}/build",
+      "executable": "${command:cmake.selectLaunchTarget}",
+      "name": "PyOCD STLINK STM32G4 2",
+      "device": "STM32G473RETx",
+      "request": "launch",
+      "type": "cortex-debug",
+      "runToEntryPoint": "main",
+      "showDevDebugOutput": "none",
+      "servertype": "pyocd",
+      "svdFile": "${workspaceRoot}/.vscode/STM32G474xx.svd",
+      "serverArgs": [
+        "-t",
+        "stm32g473retx",
+        "-u",
+        "${input:stLinkNo2SerialNumber}",
+        "-O",
+        "rtos.enable=false",
+        "--project",
+        "${workspaceFolder}"
+      ],
+      "windows": {
+        "gdbPath": "${workspaceFolder}/.environment/envs/sdk/Library/bin/arm-none-eabi-gdb.exe"
+      },
+      "linux": {
+        "gdbPath": "${workspaceFolder}/.vscode/run-gdb.sh"
+      },
+      "osx": {
+        "gdbPath": "${workspaceFolder}/.vscode/run-gdb.sh"
+      },
+      "presentation": {
+        "group": "1 PyOCD"
+      }
+    },
+    {
+      "cwd": "${workspaceRoot}/build",
+      "executable": "${command:cmake.selectLaunchTarget}",
+      "name": "PyOCD STLINK STM32G4 3",
+      "device": "STM32G473RETx",
+      "request": "launch",
+      "type": "cortex-debug",
+      "runToEntryPoint": "main",
+      "showDevDebugOutput": "none",
+      "servertype": "pyocd",
+      "svdFile": "${workspaceRoot}/.vscode/STM32G474xx.svd",
+      "serverArgs": [
+        "-t",
+        "stm32g473retx",
+        "-u",
+        "${input:stLinkNo3SerialNumber}",
+        "-O",
+        "rtos.enable=false",
+        "--project",
+        "${workspaceFolder}"
+      ],
+      "windows": {
+        "gdbPath": "${workspaceFolder}/.environment/envs/sdk/Library/bin/arm-none-eabi-gdb.exe"
+      },
+      "linux": {
+        "gdbPath": "${workspaceFolder}/.vscode/run-gdb.sh"
+      },
+      "osx": {
+        "gdbPath": "${workspaceFolder}/.vscode/run-gdb.sh"
+      },
+      "presentation": {
+        "group": "1 PyOCD"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "stLinkNo1SerialNumber",
+      "type": "command",
+      "command": "extension.commandvariable.file.content",
+      "args": {
+        "fileName": "${workspaceFolder}/.vscode/.launch.cfg",
+        "key": "ST_LINK_NO1_SN",
+        "default": ""
+      }
+    },
+    {
+      "id": "stLinkNo2SerialNumber",
+      "type": "command",
+      "command": "extension.commandvariable.file.content",
+      "args": {
+        "fileName": "${workspaceFolder}/.vscode/.launch.cfg",
+        "key": "ST_LINK_NO2_SN",
+        "default": ""
+      }
+    },
+    {
+      "id": "stLinkNo3SerialNumber",
+      "type": "command",
+      "command": "extension.commandvariable.file.content",
+      "args": {
+        "fileName": "${workspaceFolder}/.vscode/.launch.cfg",
+        "key": "ST_LINK_NO3_SN",
+        "default": ""
+      }
+    }
+  ]
+}

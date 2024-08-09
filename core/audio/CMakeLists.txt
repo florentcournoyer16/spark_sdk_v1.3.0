@@ -1,0 +1,52 @@
+zephyr_library_named(audio_core)
+target_sources(audio_core
+    PRIVATE
+        endpoint/sac_mixer_endpoint.c
+        endpoint/sac_sinus_endpoint.c
+        gate/sac_fallback_gate.c
+        module/sac_mixer_module.c
+        module/sac_fallback_module.c
+        processing/sac_compression.c
+        processing/sac_mute_on_underflow.c
+        processing/sac_mute_packet.c
+        processing/sac_packing.c
+        processing/sac_volume.c
+        processing/sac_src_cmsis.c
+        processing/sac_cdc.c
+        processing/sac_cdc_clock_steering.c
+        sac_api.c
+        sac_stats.c
+        sac_utils.c
+    PUBLIC
+        endpoint/sac_mixer_endpoint.h
+        endpoint/sac_sinus_endpoint.h
+        gate/sac_fallback_gate.h
+        module/sac_mixer_module.h
+        module/sac_fallback_module.h
+        processing/sac_compression.h
+        processing/sac_mute_on_underflow.h
+        processing/sac_mute_packet.h
+        processing/sac_packing.h
+        processing/sac_volume.h
+        processing/sac_src_cmsis.h
+        processing/sac_cdc.h
+        processing/sac_cdc_clock_steering.h
+        sac_api.h
+        sac_error.h
+        sac_stats.h
+        sac_utils.h
+)
+
+target_link_libraries(audio_core PUBLIC adpcm cmsis_5 crc4_itu memory queue resampling)
+target_include_directories(audio_core
+    PUBLIC
+        ${CMAKE_CURRENT_LIST_DIR}
+        ${CMAKE_CURRENT_LIST_DIR}/endpoint
+        ${CMAKE_CURRENT_LIST_DIR}/gate
+        ${CMAKE_CURRENT_LIST_DIR}/module
+        ${CMAKE_CURRENT_LIST_DIR}/processing
+)
+
+if(BUILD_SDK_UNIT_TESTS)
+    add_subdirectory(test)
+endif()
