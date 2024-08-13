@@ -67,7 +67,7 @@ extern void cortical_implant_routine(void)
     uint8_t *hello_world_buf = NULL;
 
     swc_memory_pool_ptr = malloc(SWC_MEM_POOL_SIZE);
-
+    
     iface_board_init();
 
     app_swc_core_init(&swc_err);
@@ -76,7 +76,7 @@ extern void cortical_implant_routine(void)
     }
 
     swc_connect(&swc_err);
-    
+    printk("INIT : Initialisation complete.\n");
     while (1) {
         swc_connection_get_payload_buffer(tx_conn, &hello_world_buf, &swc_err);
         if (hello_world_buf != NULL) {

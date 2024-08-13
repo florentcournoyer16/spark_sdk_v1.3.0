@@ -63,16 +63,16 @@ extern void radio_disable_irq_it(void)
 
 extern void radio_enable_dma_irq_it(void)
 {
-    printk("%s: Trying to enable DMA while not implemented.\n", uwb_spi_dev->name);
-    irq_enable(Radio_DMA_IRQ);
+    //printk("%s: Trying to enable DMA while not implemented.\n", uwb_spi_dev->name);
+    NVIC_EnableIRQ(CRYPTOCELL_IRQn);
     // Not yet implemented
     return;
 }
 
 extern void radio_disable_dma_irq_it(void)
 {
-    printk("%s: Trying to disable DMA while not implemented.\n", uwb_spi_dev->name);
-    irq_disable(Radio_DMA_IRQ);
+    //printk("%s: Trying to disable DMA while not implemented.\n", uwb_spi_dev->name);
+    NVIC_DisableIRQ(CRYPTOCELL_IRQn);
     // Not yet implemented
     return;
 }
@@ -99,13 +99,11 @@ extern void radio_reset_reset_pin(void)
 
 extern void radio_spi_set_cs(void)
 {
-    // TO VERIFY
     gpio_pin_set_dt(&uwb_cs_ctrl.gpio, UWB_CS_CTRL_ACTIVE);
 }
 
 extern void radio_spi_reset_cs(void)
 {
-    // TO VERIFY
     gpio_pin_set_dt(&uwb_cs_ctrl.gpio, UWB_CS_CTRL_INACTIVE);
 }
 
@@ -172,8 +170,8 @@ extern void radio_spi_transfer_full_duplex_blocking(uint8_t *tx_data, uint8_t *r
 
 	struct spi_buf_set tx_set = { .buffers = &tx_buf, .count = 1 };
 	struct spi_buf_set rx_set = { .buffers = &rx_buf, .count = 1 };
-
-	if(spi_transceive(uwb_spi_dev, &spi_conf, &tx_set, &rx_set))
+    int err = spi_transceive(uwb_spi_dev, &spi_conf, &tx_set, &rx_set);
+	if(err != 0)
     {
         printk("%s: device failed to transfer_full_duplex.\n", uwb_spi_dev->name);
     }
@@ -206,8 +204,10 @@ extern void radio_context_switch(void)
 {
     // TODO: Find a way to trigger the interrupt instead of calling the IRQHandler directly
 
-    printk("%s: Context switch, used but not implemented.\n", uwb_spi_dev->name);
-    usens_trigger_radio_irq_callback();
+    // printk("%s: Context switch, used but not implemented.\n", uwb_spi_dev->name);
+    NVIC_SetPendingIRQ(QSPI_IRQn);
+    // NVIC_SetPendingIRQ(GPIOTE_IRQn);
+    // usens_trigger_radio_irq_callback();
     // Not implemented yet
 }
 
@@ -219,7 +219,8 @@ extern void radio_callback_context_switch(void)
     //NVIC_SetPendingIRQ(fake_PendSV_IRQ);
     // SET_BIT(SCB->ICSR, SCB_ICSR_PENDSVSET_Msk);
     //PendSV_IRQn;
-    usens_trigger_pendsv_callback();
+    NVIC_SetPendingIRQ(PWM3_IRQn);
+    //usens_trigger_pendsv_callback();
     // Not implemented yet
 }
 
@@ -282,5 +283,7 @@ static void init_radio_spi_buf(void)
 
 void Radio_DMA_IRQ_trigger(const struct device *dev, int status, void *userdata)
 {
-    NVIC_SetPendingIRQ(Radio_DMA_IRQ);
+    //Radio_DMA_IRQHandler(NULL);
+    //printk("Transfer completed");
+    NVIC_SetPendingIRQ(CRYPTOCELL_IRQn);
 }

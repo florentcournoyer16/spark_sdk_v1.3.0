@@ -83,7 +83,12 @@ static void default_irq_callback(void)
  */
 void Radio_IRQ_IRQHandler(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
-	//printk("salut_IRQ\n");
+    common_callback();
+    radio_irq_callback();
+}
+
+void fake_Radio_IRQ_IRQHandler(const void *args)
+{
     common_callback();
     radio_irq_callback();
 }
@@ -92,22 +97,15 @@ void Radio_IRQ_IRQHandler(const struct device *dev, struct gpio_callback *cb, ui
  */
 void Radio_DMA_IRQHandler(const void *args)
 {
-    //printk("DMA_IRQ\n");
-    
     common_callback();
     radio_dma_callback();
-
-    //NVIC_ClearPendingIRQ(Radio_DMA_IRQ);
 }
 
 /** @brief This function handles Pendable request for System Service.
  */
 static void fake_PendSV_Handler(const void *args)
 {
-    //printk("PendSV_Handler\n");
     pendsv_irq_callback();
-
-    //NVIC_ClearPendingIRQ(fake_PendSV_IRQ);
 }
 
 /** @brief Initialize IRQ pins.
@@ -140,6 +138,27 @@ static void init_radio_irq_gpio(void)
 static void init_PendSV_irq(void)
 {
     //PendSV_IRQn;
+}
+
+static void init_irqs(void)
+{
+    // fake_PendSV_IRQ = find_unused_irq(CONFIG_NUM_IRQS - 1);
+
+    // Radio_DMA_IRQ = find_unused_irq(fake_PendSV_IRQ);
+	irq_connect_dynamic(PWM3_IRQn, PRIO_PEND_SV_IRQ, fake_PendSV_Handler, NULL, MY_IRQ_FLAGS);
+
+	NVIC_ClearPendingIRQ(PWM3_IRQn);
+	NVIC_EnableIRQ(PWM3_IRQn);
+
+    irq_connect_dynamic(CRYPTOCELL_IRQn, PRIO_RADIO_DMA, Radio_DMA_IRQHandler, NULL, MY_IRQ_FLAGS);
+
+	NVIC_ClearPendingIRQ(CRYPTOCELL_IRQn);
+	NVIC_EnableIRQ(CRYPTOCELL_IRQn);
+
+	irq_connect_dynamic(QSPI_IRQn, PRIO_RADIO_DMA, fake_Radio_IRQ_IRQHandler, NULL, MY_IRQ_FLAGS);
+
+	NVIC_ClearPendingIRQ(QSPI_IRQn);
+	NVIC_EnableIRQ(QSPI_IRQn);
 }
 
 static int find_unused_irq(int start)
@@ -180,21 +199,4 @@ static int find_unused_irq(int start)
 		}
 	}
 	return i;
-}
-
-static void init_irqs(void)
-{
-    fake_PendSV_IRQ = find_unused_irq(CONFIG_NUM_IRQS - 1);
-
-    Radio_DMA_IRQ = find_unused_irq(fake_PendSV_IRQ);
-
-	irq_connect_dynamic(fake_PendSV_IRQ, PRIO_PEND_SV_IRQ, fake_PendSV_Handler, NULL, MY_IRQ_FLAGS);
-
-	NVIC_ClearPendingIRQ(fake_PendSV_IRQ);
-	NVIC_EnableIRQ(fake_PendSV_IRQ);
-
-    irq_connect_dynamic(Radio_DMA_IRQ, PRIO_RADIO_DMA, Radio_DMA_IRQHandler, NULL, MY_IRQ_FLAGS);
-
-	NVIC_ClearPendingIRQ(Radio_DMA_IRQ);
-	NVIC_EnableIRQ(Radio_DMA_IRQ);
 }

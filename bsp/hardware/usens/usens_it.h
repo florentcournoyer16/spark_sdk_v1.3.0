@@ -17,6 +17,7 @@ typedef void (*irq_callback)(void);
 static int fake_PendSV_IRQ;
 static int Radio_DMA_IRQ;
 
+void Radio_DMA_IRQHandler(const void *args);
 
 /* PUBLIC FUNCTION PROTOTYPES *************************************************/
 /** @brief This function initialise interrupts handlers.
