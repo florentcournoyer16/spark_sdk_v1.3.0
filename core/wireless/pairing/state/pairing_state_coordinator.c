@@ -21,7 +21,7 @@
 /* MACROS *********************************************************************/
 #define EXTRACT_PAN_ID(x) ((x >> (8 * 1)) & 0x0FFF)
 #define EXTRACT_DEVICE_ADDRESS(x) ((x >> (8 * 0)) & 0xFF)
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof(*(a)))
+#define ARRAY_SIZE_SPARK(a) (sizeof(a) / sizeof(*(a)))
 
 /* PRIVATE GLOBALS ************************************************************/
 static pairing_authentication_message_t pairing_authentication_message;
@@ -84,7 +84,7 @@ void pairing_state_coordinator_init(void)
 {
     uint8_t state_machine_size = 0;
 
-    state_machine_size = (ARRAY_SIZE(pairing_state_machine));
+    state_machine_size = (ARRAY_SIZE_SPARK(pairing_state_machine));
     pairing_state_machine_init(pairing_state_machine, state_machine_size);
 
     pairing_state_set_current_state(PAIRING_STATE_ENTER);
@@ -95,11 +95,16 @@ void sent_message_coordinator_callback(void)
     pairing_state_t current_pairing_state = pairing_state_get_current_state();
 
     /* Used by the pairing procedure to ensure that the message was sent successfully. */
-    if (current_pairing_state == PAIRING_STATE_AUTHENTICATION_WAIT_FOR_ACK) {
+    if (current_pairing_state == PAIRING_STATE_AUTHENTICATION_WAIT_FOR_ACK)
+    {
         pairing_state_set_current_state(PAIRING_STATE_AUTHENTICATION_WAIT_FOR_RESPONSE);
-    } else if (current_pairing_state == PAIRING_STATE_IDENTIFICATION_WAIT_FOR_ACK) {
+    }
+    else if (current_pairing_state == PAIRING_STATE_IDENTIFICATION_WAIT_FOR_ACK)
+    {
         pairing_state_set_current_state(PAIRING_STATE_IDENTIFICATION_ACTION);
-    } else if (current_pairing_state == PAIRING_STATE_ADDRESSING_WAIT_FOR_ACK) {
+    }
+    else if (current_pairing_state == PAIRING_STATE_ADDRESSING_WAIT_FOR_ACK)
+    {
         pairing_state_set_current_state(PAIRING_STATE_ADDRESSING_WAIT_FOR_RESPONSE);
     }
 }
@@ -109,9 +114,12 @@ void received_message_coordinator_callback(uint8_t *received_message, uint8_t me
     received_pairing_command = (pairing_command_t)received_message[PAIRING_BYTE_COMMAND];
 
     /* Verify if the received message is valid. */
-    if (message_size < PAIRING_MAX_PAYLOAD_SIZE) {
+    if (message_size < PAIRING_MAX_PAYLOAD_SIZE)
+    {
         memcpy(received_payload, received_message, message_size);
-    } else {
+    }
+    else
+    {
         /* Something went wrong, pairing is aborted. */
         pairing_error_set_error(PAIRING_ERR_WIRELESS_ERROR);
     }
@@ -162,7 +170,7 @@ static void authentication_send_message(void)
 {
     /* Prepare the authentication message. */
     pairing_authentication_message.pairing_command = PAIRING_COMMAND_AUTHENTICATION_MESSAGE;
-    pairing_authentication_message.app_code        = pairing_security_get_app_code();
+    pairing_authentication_message.app_code = pairing_security_get_app_code();
 
     pairing_wireless_send_message((uint8_t *)&pairing_authentication_message, sizeof(pairing_authentication_message));
 
@@ -180,7 +188,8 @@ static void authentication_wait_for_ack(void)
  */
 static void authentication_wait_for_response(void)
 {
-    if (received_pairing_command == PAIRING_COMMAND_AUTHENTICATION_RESPONSE) {
+    if (received_pairing_command == PAIRING_COMMAND_AUTHENTICATION_RESPONSE)
+    {
         received_pairing_command = PAIRING_COMMAND_NONE;
 
         /* Store the authentication action. */
@@ -195,9 +204,12 @@ static void authentication_wait_for_response(void)
  */
 static void authentication_action(void)
 {
-    if (pairing_authentication_action == PAIRING_AUTHENTICATION_ACTION_SUCCESS) {
+    if (pairing_authentication_action == PAIRING_AUTHENTICATION_ACTION_SUCCESS)
+    {
         pairing_state_set_current_state(PAIRING_STATE_IDENTIFICATION_WAIT_FOR_MESSAGE);
-    } else if (pairing_authentication_action == PAIRING_AUTHENTICATION_ACTION_FAIL) {
+    }
+    else if (pairing_authentication_action == PAIRING_AUTHENTICATION_ACTION_FAIL)
+    {
         pairing_event_set_event(PAIRING_EVENT_INVALID_APP_CODE);
         pairing_state_set_current_state(PAIRING_STATE_EXIT);
     }
@@ -211,7 +223,8 @@ static void identification_wait_for_message(void)
     uint32_t generated_address = 0;
     uint8_t node_address = 0;
 
-    if (received_pairing_command == PAIRING_COMMAND_IDENTIFICATION_MESSAGE) {
+    if (received_pairing_command == PAIRING_COMMAND_IDENTIFICATION_MESSAGE)
+    {
         received_pairing_command = PAIRING_COMMAND_NONE;
 
         /* Store the received identification message. */
@@ -259,9 +272,12 @@ static void identification_wait_for_ack(void)
  */
 static void identification_action(void)
 {
-    if (pairing_identification_action == PAIRING_IDENTIFICATION_ACTION_SUCCESS) {
+    if (pairing_identification_action == PAIRING_IDENTIFICATION_ACTION_SUCCESS)
+    {
         pairing_state_set_current_state(PAIRING_STATE_ADDRESSING_SEND_MESSAGE);
-    } else if (pairing_identification_action == PAIRING_IDENTIFICATION_ACTION_FAIL) {
+    }
+    else if (pairing_identification_action == PAIRING_IDENTIFICATION_ACTION_FAIL)
+    {
         pairing_state_set_current_state(PAIRING_STATE_EXIT);
     }
 
@@ -274,9 +290,9 @@ static void addressing_send_message(void)
 {
     /* Prepare the addressing message. */
     pairing_addressing_message.pairing_command = PAIRING_COMMAND_ADDRESSING_MESSAGE;
-    pairing_addressing_message.pan_id          = pairing_address_get_pan_id();
-    pairing_addressing_message.coordinator_id  = pairing_address_get_coordinator_address();
-    pairing_addressing_message.node_id         = pairing_address_get_node_address();
+    pairing_addressing_message.pan_id = pairing_address_get_pan_id();
+    pairing_addressing_message.coordinator_id = pairing_address_get_coordinator_address();
+    pairing_addressing_message.node_id = pairing_address_get_node_address();
 
     pairing_wireless_send_message((uint8_t *)&pairing_addressing_message, sizeof(pairing_addressing_message));
 
@@ -294,7 +310,8 @@ static void addressing_wait_for_ack(void)
  */
 static void addressing_wait_for_response(void)
 {
-    if (received_pairing_command == PAIRING_COMMAND_ADDRESSING_RESPONSE) {
+    if (received_pairing_command == PAIRING_COMMAND_ADDRESSING_RESPONSE)
+    {
         received_pairing_command = PAIRING_COMMAND_NONE;
 
         /* Store the addressing action. */
@@ -309,7 +326,8 @@ static void addressing_wait_for_response(void)
  */
 static void addressing_action(void)
 {
-    if (pairing_addressing_action == PAIRING_ADDRESSING_ACTION_SUCCESS) {
+    if (pairing_addressing_action == PAIRING_ADDRESSING_ACTION_SUCCESS)
+    {
         pairing_event_set_event(PAIRING_EVENT_SUCCESS);
         pairing_state_set_current_state(PAIRING_STATE_EXIT);
     }

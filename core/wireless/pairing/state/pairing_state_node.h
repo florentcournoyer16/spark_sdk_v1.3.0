@@ -13,24 +13,25 @@
 #include "pairing_def.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-/* PUBLIC GLOBALS *************************************************************/
-/** @brief Initialize the node state machine.
- */
-void pairing_state_node_init(void);
+    /* PUBLIC GLOBALS *************************************************************/
+    /** @brief Initialize the node state machine.
+     */
+    void pairing_state_node_init(void);
 
-/** @brief Callback function when a message is successfully sent.
- */
-void sent_message_node_callback(void);
+    /** @brief Callback function when a message is successfully sent.
+     */
+    void sent_message_node_callback(void);
 
-/** @brief Callback function when a message is received.
- *
- *  @param[in] received_message  The received message.
- *  @param[in] message_size      The received message size.
- */
-void received_message_node_callback(uint8_t *received_message, uint8_t message_size);
+    /** @brief Callback function when a message is received.
+     *
+     *  @param[in] received_message  The received message.
+     *  @param[in] message_size      The received message size.
+     */
+    void received_message_node_callback(uint8_t *received_message, uint8_t message_size);
 
 #ifdef __cplusplus
 }

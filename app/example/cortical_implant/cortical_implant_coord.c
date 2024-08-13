@@ -8,18 +8,19 @@
  */
 
 /* INCLUDES *******************************************************************/
-#include <stdio.h>
 #include "iface_cortical_implant.h"
 #include "iface_wireless.h"
 #include "swc_api.h"
 #include "swc_cfg_coord.h"
 #include "swc_stats.h"
+#include <stdio.h>
+#include <zephyr/kernel.h>
 
 /* CONSTANTS ******************************************************************/
-#define SWC_MEM_POOL_SIZE          6000
-#define MAX_PAYLOAD_SIZE_BYTE      20
+#define SWC_MEM_POOL_SIZE 6000
+#define MAX_PAYLOAD_SIZE_BYTE 20
 #define ENDING_NULL_CHARACTER_SIZE 1
-#define STATS_ARRAY_LENGTH         1024
+#define STATS_ARRAY_LENGTH 1024
 
 /* PRIVATE GLOBALS ************************************************************/
 /* ** Wireless Core ** */
@@ -54,34 +55,42 @@ static void reset_stats(void);
 extern void cortical_implant_routine(void)
 {
     swc_error_t swc_err;
-    swc_memory_pool_ptr = malloc(SWC_MEM_POOL_SIZE);
-    uint8_t str_counter      = 0;
+    swc_memory_pool_ptr = k_malloc(SWC_MEM_POOL_SIZE);
+    uint8_t str_counter = 0;
     uint8_t *cortical_implant_buf = NULL;
 
     iface_board_init();
 
     app_swc_core_init(&swc_err);
-    if (swc_err != SWC_ERR_NONE) {
-        while (1);
+    if (swc_err != SWC_ERR_NONE)
+    {
+        while (1)
+            ;
     }
 
     swc_connect(&swc_err);
 
-    while (1) {
+    while (1)
+    {
         swc_connection_get_payload_buffer(tx_conn, &cortical_implant_buf, &swc_err);
-        if (cortical_implant_buf != NULL) {
+        if (cortical_implant_buf != NULL)
+        {
             size_t tx_payload_size = snprintf((char *)cortical_implant_buf, MAX_PAYLOAD_SIZE_BYTE, "Hello, World! %d\n\r", str_counter++);
 
             swc_connection_send(tx_conn, cortical_implant_buf, tx_payload_size + ENDING_NULL_CHARACTER_SIZE, &swc_err);
         }
 
         /* Print received string and stats every 1000 transmissions */
-        if (print_stats_now) {
-            if (reset_stats_now) {
+        if (print_stats_now)
+        {
+            if (reset_stats_now)
+            {
                 swc_connection_reset_stats(tx_conn);
                 swc_connection_reset_stats(rx_conn);
                 reset_stats_now = false;
-            } else {
+            }
+            else
+            {
                 iface_print_string(rx_payload);
                 print_stats();
             }
@@ -102,16 +111,17 @@ static void app_swc_core_init(swc_error_t *err)
 
     swc_cfg_t core_cfg = {
         .timeslot_sequence = timeslot_us,
-        .timeslot_sequence_length = ARRAY_SIZE(timeslot_us),
+        .timeslot_sequence_length = ARRAY_SIZE_SPARK(timeslot_us),
         .channel_sequence = channel_sequence,
-        .channel_sequence_length = ARRAY_SIZE(channel_sequence),
+        .channel_sequence_length = ARRAY_SIZE_SPARK(channel_sequence),
         .fast_sync_enabled = false,
         .random_channel_sequence_enabled = false,
         .memory_pool = swc_memory_pool_ptr,
         .memory_pool_size = SWC_MEM_POOL_SIZE,
     };
     swc_init(core_cfg, &hal, err);
-    if (*err != SWC_ERR_NONE) {
+    if (*err != SWC_ERR_NONE)
+    {
         return;
     }
 
@@ -123,7 +133,8 @@ static void app_swc_core_init(swc_error_t *err)
         .sleep_level = SWC_SLEEP_LEVEL,
     };
     node = swc_node_init(node_cfg, err);
-    if (*err != SWC_ERR_NONE) {
+    if (*err != SWC_ERR_NONE)
+    {
         return;
     }
 
@@ -132,7 +143,8 @@ static void app_swc_core_init(swc_error_t *err)
         .spi_mode = SWC_SPI_STANDARD,
     };
     swc_node_add_radio(node, radio_cfg, &hal, err);
-    if (*err != SWC_ERR_NONE) {
+    if (*err != SWC_ERR_NONE)
+    {
         return;
     }
 
@@ -146,7 +158,7 @@ static void app_swc_core_init(swc_error_t *err)
         .modulation = SWC_MODULATION,
         .fec = SWC_FEC_LEVEL,
         .timeslot_id = tx_timeslots,
-        .timeslot_count = ARRAY_SIZE(tx_timeslots),
+        .timeslot_count = ARRAY_SIZE_SPARK(tx_timeslots),
         .ack_enabled = true,
         .arq_enabled = true,
         .arq_settings.try_count = 0,
@@ -158,20 +170,23 @@ static void app_swc_core_init(swc_error_t *err)
         .fallback_enabled = false,
     };
     tx_conn = swc_connection_init(node, tx_conn_cfg, &hal, err);
-    if (*err != SWC_ERR_NONE) {
+    if (*err != SWC_ERR_NONE)
+    {
         return;
     }
 
     swc_channel_cfg_t tx_channel_cfg = {
         .tx_pulse_count = TX_DATA_PULSE_COUNT,
         .tx_pulse_width = TX_DATA_PULSE_WIDTH,
-        .tx_pulse_gain  = TX_DATA_PULSE_GAIN,
+        .tx_pulse_gain = TX_DATA_PULSE_GAIN,
         .rx_pulse_count = RX_ACK_PULSE_COUNT,
     };
-    for (uint8_t i = 0; i < ARRAY_SIZE(channel_sequence); i++) {
+    for (uint8_t i = 0; i < ARRAY_SIZE_SPARK(channel_sequence); i++)
+    {
         tx_channel_cfg.frequency = channel_frequency[i];
         swc_connection_add_channel(tx_conn, node, tx_channel_cfg, err);
-        if (*err != SWC_ERR_NONE) {
+        if (*err != SWC_ERR_NONE)
+        {
             return;
         }
     }
@@ -188,7 +203,7 @@ static void app_swc_core_init(swc_error_t *err)
         .modulation = SWC_MODULATION,
         .fec = SWC_FEC_LEVEL,
         .timeslot_id = rx_timeslots,
-        .timeslot_count = ARRAY_SIZE(rx_timeslots),
+        .timeslot_count = ARRAY_SIZE_SPARK(rx_timeslots),
         .ack_enabled = true,
         .arq_enabled = true,
         .arq_settings.try_count = 0,
@@ -199,21 +214,25 @@ static void app_swc_core_init(swc_error_t *err)
         .rdo_enabled = false,
         .fallback_enabled = false,
     };
+
     rx_conn = swc_connection_init(node, rx_conn_cfg, &hal, err);
-    if (*err != SWC_ERR_NONE) {
+    if (*err != SWC_ERR_NONE)
+    {
         return;
     }
 
     swc_channel_cfg_t rx_channel_cfg = {
         .tx_pulse_count = TX_ACK_PULSE_COUNT,
         .tx_pulse_width = TX_ACK_PULSE_WIDTH,
-        .tx_pulse_gain  = TX_ACK_PULSE_GAIN,
+        .tx_pulse_gain = TX_ACK_PULSE_GAIN,
         .rx_pulse_count = RX_DATA_PULSE_COUNT,
     };
-    for (uint8_t i = 0; i < ARRAY_SIZE(channel_sequence); i++) {
+    for (uint8_t i = 0; i < ARRAY_SIZE_SPARK(channel_sequence); i++)
+    {
         rx_channel_cfg.frequency = channel_frequency[i];
         swc_connection_add_channel(rx_conn, node, rx_channel_cfg, err);
-        if (*err != SWC_ERR_NONE) {
+        if (*err != SWC_ERR_NONE)
+        {
             return;
         }
     }
@@ -234,7 +253,8 @@ static void conn_tx_success_callback(void *conn)
 
     /* Print stats every 1000 transmissions */
     tx_count++;
-    if ((tx_count % 1000) == 0) {
+    if ((tx_count % 1000) == 0)
+    {
         print_stats_now = true;
     }
 }
@@ -249,7 +269,8 @@ static void conn_tx_fail_callback(void *conn)
 
     /* Print stats every 1000 transmissions */
     tx_count++;
-    if ((tx_count % 1000) == 0) {
+    if ((tx_count % 1000) == 0)
+    {
         print_stats_now = true;
     }
 }
@@ -293,7 +314,8 @@ static void print_stats(void)
  */
 static void reset_stats(void)
 {
-    if (reset_stats_now == false) {
+    if (reset_stats_now == false)
+    {
         reset_stats_now = true;
     }
 }

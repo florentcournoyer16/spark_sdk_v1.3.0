@@ -8,30 +8,30 @@
  */
 
 /* INCLUDES *******************************************************************/
-#include <stdio.h>
-#include <stdlib.h>
-#include <zephyr/kernel.h>
 #include "iface_cortical_implant.h"
 #include "iface_wireless.h"
 #include "swc_api.h"
 #include "swc_cfg_node.h"
 #include "swc_stats.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <zephyr/kernel.h>
 
 /* CONSTANTS ******************************************************************/
 /* More memory is needed when using dual radio. */
 #if (SWC_RADIO_COUNT == 2)
-    #define SWC_MEM_POOL_SIZE          10000
+#define SWC_MEM_POOL_SIZE 10000
 #else
-    #define SWC_MEM_POOL_SIZE          6100
+#define SWC_MEM_POOL_SIZE 6100
 #endif
 
-#define MAX_PAYLOAD_SIZE_BYTE      20
+#define MAX_PAYLOAD_SIZE_BYTE 20
 #define ENDING_NULL_CHARACTER_SIZE 1
-#define STATS_ARRAY_LENGTH         500
+#define STATS_ARRAY_LENGTH 500
 
 /* PRIVATE GLOBALS ************************************************************/
 /* ** Wireless Core ** */
-//static uint8_t swc_memory_pool[SWC_MEM_POOL_SIZE] = {0};
+// static uint8_t swc_memory_pool[SWC_MEM_POOL_SIZE] = {0};
 static uint8_t *swc_memory_pool_ptr;
 static swc_hal_t hal;
 static swc_node_t *node;
@@ -63,35 +63,43 @@ extern void cortical_implant_routine(void)
 {
     swc_error_t swc_err;
 
-    uint8_t str_counter      = 0;
+    uint8_t str_counter = 0;
     uint8_t *hello_world_buf = NULL;
 
-    swc_memory_pool_ptr = malloc(SWC_MEM_POOL_SIZE);
-    
+    swc_memory_pool_ptr = k_malloc(SWC_MEM_POOL_SIZE);
+
     iface_board_init();
 
     app_swc_core_init(&swc_err);
-    if (swc_err != SWC_ERR_NONE) {
-        while (1);
+    if (swc_err != SWC_ERR_NONE)
+    {
+        while (1)
+            ;
     }
 
     swc_connect(&swc_err);
     printk("INIT : Initialisation complete.\n");
-    while (1) {
+    while (1)
+    {
         swc_connection_get_payload_buffer(tx_conn, &hello_world_buf, &swc_err);
-        if (hello_world_buf != NULL) {
+        if (hello_world_buf != NULL)
+        {
             size_t tx_payload_size = snprintf((char *)hello_world_buf, MAX_PAYLOAD_SIZE_BYTE, "Hello, World! %d\n\r", str_counter++);
 
             swc_connection_send(tx_conn, hello_world_buf, tx_payload_size + ENDING_NULL_CHARACTER_SIZE, &swc_err);
         }
 
         /* Print received string and stats every 1000 transmissions */
-        if (print_stats_now) {
-            if (reset_stats_now) {
+        if (print_stats_now)
+        {
+            if (reset_stats_now)
+            {
                 swc_connection_reset_stats(tx_conn);
                 swc_connection_reset_stats(rx_conn);
                 reset_stats_now = false;
-            } else {
+            }
+            else
+            {
                 iface_print_string(rx_payload);
                 print_stats();
             }
@@ -121,10 +129,11 @@ static void app_swc_core_init(swc_error_t *err)
         .memory_pool_size = SWC_MEM_POOL_SIZE,
     };
     swc_init(core_cfg, &hal, err);
-    if (*err != SWC_ERR_NONE) {
+    if (*err != SWC_ERR_NONE)
+    {
         return;
     }
-    
+
     swc_node_cfg_t node_cfg = {
         .role = NETWORK_ROLE,
         .pan_id = PAN_ID,
@@ -133,7 +142,8 @@ static void app_swc_core_init(swc_error_t *err)
         .sleep_level = SWC_SLEEP_LEVEL,
     };
     node = swc_node_init(node_cfg, err);
-    if (*err != SWC_ERR_NONE) {
+    if (*err != SWC_ERR_NONE)
+    {
         return;
     }
     printk("INIT : swc_node successfully initialized.\n");
@@ -143,7 +153,8 @@ static void app_swc_core_init(swc_error_t *err)
         .spi_mode = SWC_SPI_STANDARD,
     };
     swc_node_add_radio(node, radio_cfg, &hal, err);
-    if (*err != SWC_ERR_NONE) {
+    if (*err != SWC_ERR_NONE)
+    {
         return;
     }
 
@@ -169,20 +180,23 @@ static void app_swc_core_init(swc_error_t *err)
         .fallback_enabled = false,
     };
     tx_conn = swc_connection_init(node, tx_conn_cfg, &hal, err);
-    if (*err != SWC_ERR_NONE) {
+    if (*err != SWC_ERR_NONE)
+    {
         return;
     }
 
     swc_channel_cfg_t tx_channel_cfg = {
         .tx_pulse_count = TX_DATA_PULSE_COUNT,
         .tx_pulse_width = TX_DATA_PULSE_WIDTH,
-        .tx_pulse_gain  = TX_DATA_PULSE_GAIN,
+        .tx_pulse_gain = TX_DATA_PULSE_GAIN,
         .rx_pulse_count = RX_ACK_PULSE_COUNT,
     };
-    for (uint8_t i = 0; i < ARRAY_SIZE(channel_sequence); i++) {
+    for (uint8_t i = 0; i < ARRAY_SIZE(channel_sequence); i++)
+    {
         tx_channel_cfg.frequency = channel_frequency[i];
         swc_connection_add_channel(tx_conn, node, tx_channel_cfg, err);
-        if (*err != SWC_ERR_NONE) {
+        if (*err != SWC_ERR_NONE)
+        {
             return;
         }
     }
@@ -211,20 +225,23 @@ static void app_swc_core_init(swc_error_t *err)
         .fallback_enabled = false,
     };
     rx_conn = swc_connection_init(node, rx_conn_cfg, &hal, err);
-    if (*err != SWC_ERR_NONE) {
+    if (*err != SWC_ERR_NONE)
+    {
         return;
     }
 
     swc_channel_cfg_t rx_channel_cfg = {
         .tx_pulse_count = TX_ACK_PULSE_COUNT,
         .tx_pulse_width = TX_ACK_PULSE_WIDTH,
-        .tx_pulse_gain  = TX_ACK_PULSE_GAIN,
+        .tx_pulse_gain = TX_ACK_PULSE_GAIN,
         .rx_pulse_count = RX_DATA_PULSE_COUNT,
     };
-    for (uint8_t i = 0; i < ARRAY_SIZE(channel_sequence); i++) {
+    for (uint8_t i = 0; i < ARRAY_SIZE(channel_sequence); i++)
+    {
         rx_channel_cfg.frequency = channel_frequency[i];
         swc_connection_add_channel(rx_conn, node, rx_channel_cfg, err);
-        if (*err != SWC_ERR_NONE) {
+        if (*err != SWC_ERR_NONE)
+        {
             return;
         }
     }
@@ -245,7 +262,8 @@ static void conn_tx_success_callback(void *conn)
 
     /* Print stats every 1000 transmissions */
     tx_count++;
-    if ((tx_count % 1000) == 0) {
+    if ((tx_count % 1000) == 0)
+    {
         print_stats_now = true;
     }
 }
@@ -260,7 +278,8 @@ static void conn_tx_fail_callback(void *conn)
 
     /* Print stats every 1000 transmissions */
     tx_count++;
-    if ((tx_count % 1000) == 0) {
+    if ((tx_count % 1000) == 0)
+    {
         print_stats_now = true;
     }
 }
@@ -304,7 +323,8 @@ static void print_stats(void)
  */
 static void reset_stats(void)
 {
-    if (reset_stats_now == false) {
+    if (reset_stats_now == false)
+    {
         reset_stats_now = true;
     }
 }

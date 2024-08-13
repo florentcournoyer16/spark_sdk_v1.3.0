@@ -14,21 +14,23 @@
 #include "swc_api.h"
 #include "swc_cfg_coord.h"
 #include "swc_utils.h"
+#include <zephyr/kernel.h>
 
 /* CONSTANTS ******************************************************************/
 /* Memory reserved for the SPARK Wireless Core. */
-#define SWC_MEM_POOL_SIZE           5100
+#define SWC_MEM_POOL_SIZE 5100
 /* The timeout in second after which the pairing procedure will abort. */
-#define PAIRING_TIMEOUT_IN_SECONDS  10
+#define PAIRING_TIMEOUT_IN_SECONDS 10
 /* The discovery list include the coordinator and the node devices. */
 #define PAIRING_DISCOVERY_LIST_SIZE 2
 /* The application code prevents unwanted devices from pairing with this application. */
-#define PAIRING_APP_CODE            0x12345678
+#define PAIRING_APP_CODE 0x12345678
 
 /* TYPES **********************************************************************/
 /** @brief The application level device states.
  */
-typedef enum device_pairing_state {
+typedef enum device_pairing_state
+{
     /*! The device is not paired with the node. */
     DEVICE_UNPAIRED,
     /*! The device is paired with the node. */
@@ -70,7 +72,7 @@ static void abort_pairing_procedure(void);
 /* PUBLIC FUNCTIONS ***********************************************************/
 int cortical_implant_routine(void)
 {
-    swc_memory_pool_ptr = malloc(SWC_MEM_POOL_SIZE);
+    swc_memory_pool_ptr = k_malloc(SWC_MEM_POOL_SIZE);
     /* Initialize the board and the SPARK Wireless Core. */
     iface_board_init();
     iface_swc_hal_init(&hal);
@@ -79,12 +81,16 @@ int cortical_implant_routine(void)
     /* The device starts by default in the unpaired state. */
     device_pairing_state = DEVICE_UNPAIRED;
 
-    while (1) {
-        if (device_pairing_state == DEVICE_UNPAIRED) {
+    while (1)
+    {
+        if (device_pairing_state == DEVICE_UNPAIRED)
+        {
             /* Since the device is unpaired the send_button_status should do nothing */
             enter_pairing_mode();
-        } else if (device_pairing_state == DEVICE_PAIRED) {
-            //unpair_device();
+        }
+        else if (device_pairing_state == DEVICE_PAIRED)
+        {
+            // unpair_device();
         }
     }
 }
@@ -129,10 +135,10 @@ static void app_swc_configuration(pairing_assigned_address_t *pairing_assigned_a
         .fast_sync_enabled = false,
         .random_channel_sequence_enabled = false,
         .memory_pool = swc_memory_pool_ptr,
-        .memory_pool_size = SWC_MEM_POOL_SIZE
-    };
+        .memory_pool_size = SWC_MEM_POOL_SIZE};
     swc_init(core_cfg, &hal, err);
-    if (*err != SWC_ERR_NONE) {
+    if (*err != SWC_ERR_NONE)
+    {
         return;
     }
 
@@ -141,10 +147,10 @@ static void app_swc_configuration(pairing_assigned_address_t *pairing_assigned_a
         .pan_id = pairing_assigned_address->pan_id,
         .coordinator_address = coordinator_address,
         .local_address = coordinator_address,
-        .sleep_level = SWC_SLEEP_LEVEL
-    };
+        .sleep_level = SWC_SLEEP_LEVEL};
     node = swc_node_init(node_cfg, err);
-    if (*err != SWC_ERR_NONE) {
+    if (*err != SWC_ERR_NONE)
+    {
         return;
     }
 
@@ -153,7 +159,8 @@ static void app_swc_configuration(pairing_assigned_address_t *pairing_assigned_a
         .spi_mode = SWC_SPI_STANDARD,
     };
     swc_node_add_radio(node, radio_cfg, &hal, err);
-    if (*err != SWC_ERR_NONE) {
+    if (*err != SWC_ERR_NONE)
+    {
         return;
     }
 
@@ -176,23 +183,24 @@ static void app_swc_configuration(pairing_assigned_address_t *pairing_assigned_a
         .cca_enabled = false,
         .throttling_enabled = false,
         .rdo_enabled = false,
-        .fallback_enabled = false
-    };
+        .fallback_enabled = false};
     tx_conn = swc_connection_init(node, tx_conn_cfg, &hal, err);
-    if (*err != SWC_ERR_NONE) {
+    if (*err != SWC_ERR_NONE)
+    {
         return;
     }
 
     swc_channel_cfg_t tx_channel_cfg = {
         .tx_pulse_count = TX_DATA_PULSE_COUNT,
         .tx_pulse_width = TX_DATA_PULSE_WIDTH,
-        .tx_pulse_gain  = TX_DATA_PULSE_GAIN,
-        .rx_pulse_count = RX_ACK_PULSE_COUNT
-    };
-    for (uint8_t i = 0; i < SWC_ARRAY_SIZE(channel_sequence); i++) {
+        .tx_pulse_gain = TX_DATA_PULSE_GAIN,
+        .rx_pulse_count = RX_ACK_PULSE_COUNT};
+    for (uint8_t i = 0; i < SWC_ARRAY_SIZE(channel_sequence); i++)
+    {
         tx_channel_cfg.frequency = channel_frequency[i];
         swc_connection_add_channel(tx_conn, node, tx_channel_cfg, err);
-        if (*err != SWC_ERR_NONE) {
+        if (*err != SWC_ERR_NONE)
+        {
             return;
         }
     }
@@ -216,23 +224,24 @@ static void app_swc_configuration(pairing_assigned_address_t *pairing_assigned_a
         .cca_enabled = false,
         .throttling_enabled = false,
         .rdo_enabled = false,
-        .fallback_enabled = false
-    };
+        .fallback_enabled = false};
     rx_conn = swc_connection_init(node, rx_conn_cfg, &hal, err);
-    if (*err != SWC_ERR_NONE) {
+    if (*err != SWC_ERR_NONE)
+    {
         return;
     }
 
     swc_channel_cfg_t rx_channel_cfg = {
         .tx_pulse_count = TX_ACK_PULSE_COUNT,
         .tx_pulse_width = TX_ACK_PULSE_WIDTH,
-        .tx_pulse_gain  = TX_ACK_PULSE_GAIN,
-        .rx_pulse_count = RX_DATA_PULSE_COUNT
-    };
-    for (uint8_t i = 0; i < SWC_ARRAY_SIZE(channel_sequence); i++) {
+        .tx_pulse_gain = TX_ACK_PULSE_GAIN,
+        .rx_pulse_count = RX_DATA_PULSE_COUNT};
+    for (uint8_t i = 0; i < SWC_ARRAY_SIZE(channel_sequence); i++)
+    {
         rx_channel_cfg.frequency = channel_frequency[i];
         swc_connection_add_channel(rx_conn, node, rx_channel_cfg, err);
-        if (*err != SWC_ERR_NONE) {
+        if (*err != SWC_ERR_NONE)
+        {
             return;
         }
     }
@@ -259,9 +268,12 @@ static void conn_rx_success_callback(void *conn)
      * When paired, the device receives the BTN2 status from the other
      * device and applies this state to the LED2.
      */
-    if (payload[0] == 0) {
+    if (payload[0] == 0)
+    {
         iface_empty_payload_received_status();
-    } else {
+    }
+    else
+    {
         iface_payload_received_status();
     }
 
@@ -291,10 +303,13 @@ static void enter_pairing_mode(void)
     iface_notify_enter_pairing();
 
     /* The wireless core must be stopped before starting the pairing procedure. */
-    if (swc_get_status() == SWC_STATUS_RUNNING) {
+    if (swc_get_status() == SWC_STATUS_RUNNING)
+    {
         swc_disconnect(&swc_err);
-        if ((swc_err != SWC_ERR_NONE) && (swc_err != SWC_ERR_NOT_CONNECTED)) {
-            while (1);
+        if ((swc_err != SWC_ERR_NONE) && (swc_err != SWC_ERR_NOT_CONNECTED))
+        {
+            while (1)
+                ;
         }
     }
 
@@ -308,19 +323,24 @@ static void enter_pairing_mode(void)
     app_pairing_cfg.uwb_regulation = SWC_REGULATION_FCC;
     pairing_event = pairing_coordinator_start(&app_pairing_cfg, &pairing_assigned_address, pairing_discovery_list,
                                               PAIRING_DISCOVERY_LIST_SIZE, &pairing_err);
-    if (pairing_err != PAIRING_ERR_NONE) {
+    if (pairing_err != PAIRING_ERR_NONE)
+    {
         /* A pairing error is critical and must not be ignored. */
-        while (1);
+        while (1)
+            ;
     }
 
     /* Handle the pairing events. */
-    switch (pairing_event) {
+    switch (pairing_event)
+    {
     case PAIRING_EVENT_SUCCESS:
         iface_notify_pairing_successful();
 
         app_swc_configuration(&pairing_assigned_address, &swc_err);
-        if (swc_err != SWC_ERR_NONE) {
-            while (1);
+        if (swc_err != SWC_ERR_NONE)
+        {
+            while (1)
+                ;
         }
         swc_connect(&swc_err);
 
@@ -348,8 +368,10 @@ static void unpair_device(void)
     device_pairing_state = DEVICE_UNPAIRED;
 
     swc_disconnect(&swc_err);
-    if ((swc_err != SWC_ERR_NONE) && (swc_err != SWC_ERR_NOT_CONNECTED)) {
-        while (1);
+    if ((swc_err != SWC_ERR_NONE) && (swc_err != SWC_ERR_NOT_CONNECTED))
+    {
+        while (1)
+            ;
     }
 
     iface_notify_not_paired();
@@ -364,7 +386,7 @@ static void pairing_application_callback(void)
      *       executes the registered application callback, which might take
      *       a variable amount of time.
      */
-    //iface_button_handling(NULL, abort_pairing_procedure);
+    // iface_button_handling(NULL, abort_pairing_procedure);
 }
 
 /** @brief Abort the pairing procedure.
