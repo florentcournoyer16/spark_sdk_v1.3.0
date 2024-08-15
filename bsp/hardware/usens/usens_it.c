@@ -15,8 +15,9 @@
 
 #define MY_IRQ_FLAGS 0
 
-#define PRIO_RADIO_DMA      IRQ_PRIO_LOWEST - 1
-#define PRIO_PEND_SV_IRQ    IRQ_PRIO_LOWEST
+#define PRIO_RADIO_RADIO_IRQ  	2
+#define PRIO_RADIO_DMA_IRQ  	2
+#define PRIO_PEND_SV_IRQ    	3
 
 /* PRIVATE FUNCTION PROTOTYPES ************************************************/
 static void default_irq_callback(void);
@@ -150,12 +151,12 @@ static void init_irqs(void)
 	NVIC_ClearPendingIRQ(PWM3_IRQn);
 	NVIC_EnableIRQ(PWM3_IRQn);
 
-    irq_connect_dynamic(CRYPTOCELL_IRQn, PRIO_RADIO_DMA, Radio_DMA_IRQHandler, NULL, MY_IRQ_FLAGS);
+    irq_connect_dynamic(CRYPTOCELL_IRQn, PRIO_RADIO_DMA_IRQ, Radio_DMA_IRQHandler, NULL, MY_IRQ_FLAGS);
 
 	NVIC_ClearPendingIRQ(CRYPTOCELL_IRQn);
 	NVIC_EnableIRQ(CRYPTOCELL_IRQn);
 
-	irq_connect_dynamic(QSPI_IRQn, PRIO_RADIO_DMA, fake_Radio_IRQ_IRQHandler, NULL, MY_IRQ_FLAGS);
+	irq_connect_dynamic(QSPI_IRQn, PRIO_RADIO_RADIO_IRQ, fake_Radio_IRQ_IRQHandler, NULL, MY_IRQ_FLAGS);
 
 	NVIC_ClearPendingIRQ(QSPI_IRQn);
 	NVIC_EnableIRQ(QSPI_IRQn);

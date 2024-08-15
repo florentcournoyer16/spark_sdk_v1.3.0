@@ -69,7 +69,8 @@ extern void cortical_implant_routine(void)
     }
 
     swc_connect(&swc_err);
-
+    printk("INIT : COORD Initialisation complete.\n");
+    
     while (1)
     {
         swc_connection_get_payload_buffer(tx_conn, &cortical_implant_buf, &swc_err);

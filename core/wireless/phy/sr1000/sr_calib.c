@@ -14,7 +14,7 @@
 #include "sr_calib.h"
 #include <string.h>
 #include "sr_access.h"
-#include "sr_def.h"¸
+#include "sr_def.h"
 
 #include <zephyr/kernel.h>
 

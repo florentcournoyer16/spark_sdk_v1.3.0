@@ -40,7 +40,7 @@
 
 /* Schedule configuration */
 #define SCHEDULE { \
-    500, 500 \
+    1000, 1000 \
 }
 #define TX_TIMESLOTS { \
     MAIN_TIMESLOT(1) \

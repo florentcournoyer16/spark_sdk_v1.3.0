@@ -17,6 +17,7 @@ target_include_directories(app
     PUBLIC  
         ${BSP_PATH}
         ${NRF_HW_CONGIG_PATH}
+        ${SPARK_CIRC_QUEUE_OPT_PATH}
 )
 
 target_sources(app 

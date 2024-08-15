@@ -19,7 +19,7 @@ extern "C" {
 #endif
 
 /* MACROS *********************************************************************/
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof(*(a)))
+#define ARRAY_SIZE_SPARK(a) (sizeof(a) / sizeof(*(a)))
 
 /* PUBLIC FUNCTION PROTOTYPES *************************************************/
 /** @brief Initialize hardware drivers in the underlying board support package.

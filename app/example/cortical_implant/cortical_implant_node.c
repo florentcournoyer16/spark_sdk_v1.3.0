@@ -78,7 +78,7 @@ extern void cortical_implant_routine(void)
     }
 
     swc_connect(&swc_err);
-    printk("INIT : Initialisation complete.\n");
+    printk("INIT : NODE Initialisation complete.\n");
     while (1)
     {
         swc_connection_get_payload_buffer(tx_conn, &hello_world_buf, &swc_err);
@@ -246,7 +246,6 @@ static void app_swc_core_init(swc_error_t *err)
         }
     }
     swc_connection_set_rx_success_callback(rx_conn, conn_rx_success_callback, err);
-
     swc_setup(node, err);
 }
 
@@ -294,7 +293,7 @@ static void conn_rx_success_callback(void *conn)
 
     swc_error_t err;
     uint8_t *payload = NULL;
-
+    printk("HOLY\n");
     /* Get new payload */
     swc_connection_receive(rx_conn, &payload, &err);
     memcpy(rx_payload, payload, sizeof(rx_payload));

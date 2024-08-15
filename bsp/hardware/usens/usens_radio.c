@@ -12,7 +12,7 @@
 #include "usens_radio.h"
 #include "usens_it.h"
 #include "hw_cfg.h"
-
+#include "circular_queue_critical_section.h"
 /* PRIVATE DEFINES ************************************************************/
 #define UWB_SHUTDOWN_ACTIVE     1
 #define UWB_SHUTDOWN_INACTIVE   0
@@ -42,6 +42,8 @@ extern void radio_peripherals_init(void)
     init_radio_shutdown_gpio();
     init_radio_reset_gpio();
     init_radio_spi_buf();
+    radio_set_reset_pin();
+    radio_reset_reset_pin();
 }
 
 extern bool radio_read_irq_pin(void)
@@ -170,10 +172,10 @@ extern void radio_spi_transfer_full_duplex_blocking(uint8_t *tx_data, uint8_t *r
 
 	struct spi_buf_set tx_set = { .buffers = &tx_buf, .count = 1 };
 	struct spi_buf_set rx_set = { .buffers = &rx_buf, .count = 1 };
-    int err = spi_transceive(uwb_spi_dev, &spi_conf, &tx_set, &rx_set);
-	if(err != 0)
+
+	if(spi_transceive(uwb_spi_dev, &spi_conf, &tx_set, &rx_set))
     {
-        printk("%s: device failed to transfer_full_duplex.\n", uwb_spi_dev->name);
+        printk("%s: device failed to transfer_full_duplex\n", uwb_spi_dev->name);
     }
 }
 
@@ -191,8 +193,6 @@ extern void radio_spi_transfer_full_duplex_non_blocking(uint8_t *tx_data, uint8_
 	struct spi_buf_set rx_set = { .buffers = &rx_buf, .count = 1 };
 
 	spi_transceive_cb(uwb_spi_dev, &spi_conf, &tx_set, &rx_set, Radio_DMA_IRQ_trigger, NULL);
-
-    //printk("%s: Trying a full duplex non-blocking transfer while not implemented.\n", uwb_spi_dev->name);
 }
 
 extern bool radio_is_spi_busy(void)
@@ -202,32 +202,17 @@ extern bool radio_is_spi_busy(void)
 
 extern void radio_context_switch(void)
 {
-    // TODO: Find a way to trigger the interrupt instead of calling the IRQHandler directly
-
-    // printk("%s: Context switch, used but not implemented.\n", uwb_spi_dev->name);
     NVIC_SetPendingIRQ(QSPI_IRQn);
-    // NVIC_SetPendingIRQ(GPIOTE_IRQn);
-    // usens_trigger_radio_irq_callback();
-    // Not implemented yet
 }
 
 extern void radio_callback_context_switch(void)
 {
-    // TODO: Find a way to trigger the interrupt instead of calling the IRQHandler directly
-    //printk("%s: Context switch callback, used but not implemented.\n", uwb_spi_dev->name);
-    //printk("PendSV_CONTEXT_SWITCH\n");
-    //NVIC_SetPendingIRQ(fake_PendSV_IRQ);
-    // SET_BIT(SCB->ICSR, SCB_ICSR_PENDSVSET_Msk);
-    //PendSV_IRQn;
     NVIC_SetPendingIRQ(PWM3_IRQn);
-    //usens_trigger_pendsv_callback();
-    // Not implemented yet
 }
 
 extern void radio_set_spi_baudrate(spi_prescaler_t prescaler)
 {
     printk("%s: Trying to set the spi baudrate while not implemented.\n", uwb_spi_dev->name);
-    // Not implemented yet
 }
 
 /* PRIVATE FUNCTIONS **********************************************************/
@@ -255,10 +240,12 @@ static void init_radio_spi_peripheral(void)
 		return;
 	}
 
+    gpio_pin_configure_dt(&uwb_cs_ctrl, GPIO_OUTPUT_INACTIVE);
+
     // TO VERIFY : Not sure about the  right config to set
-    spi_conf.frequency = 125000;
+    spi_conf.frequency = 30000000;
 	spi_conf.operation = SPI_OP_MODE_MASTER | SPI_WORD_SET(8) | SPI_TRANSFER_MSB;
-    //spi_conf.cs = uwb_cs_ctrl;
+    //spi_conf.cs.gpio = NULL;
 	spi_conf.slave = 1;
     
 }
