@@ -4,29 +4,20 @@
 #include "usens_base.h"
 #include "usens_timer.h"
 
-static bool rx_led;
-static bool tx_led;
-static bool rec_led;
 /* PUBLIC FUNCTIONS ***********************************************************/
 void iface_board_init(void)
 {
-    rx_led = 0;
-    tx_led = 0;
-    rec_led = 0;
     usens_init();
 }
 
 void iface_tx_conn_status(void)
 {
-    tx_led = !tx_led;
-    dk_set_led(RUN_STATUS_LED, tx_led);
+    gpio_pin_toggle_dt(&led0);
 }
 
 void iface_rx_conn_status(void)
 {
-    
-    rx_led = !rx_led;
-    dk_set_led(CON_STATUS_LED, rx_led);
+    gpio_pin_toggle_dt(&led1);
 }
 
 void iface_delay(uint32_t ms_delay)
@@ -42,51 +33,39 @@ void iface_print_string(char *string)
 
 void iface_payload_received_status(void)
 {
-    rec_led = 1;
     dk_set_led(REC_STATUS_LED, 1);
 }
 
 void iface_empty_payload_received_status(void)
 {
-    rec_led = 0;
     dk_set_led(REC_STATUS_LED, 0);
 }
 
 void iface_led_all_on(void)
 {
-    rx_led = 1;
-    tx_led = 1;
-    rec_led = 1;
-    dk_set_led(CON_STATUS_LED, 1);
-    dk_set_led(RUN_STATUS_LED, 1);
-    dk_set_led(REC_STATUS_LED, 1);
+    gpio_pin_set_dt(&led0, 1);
+    gpio_pin_set_dt(&led1, 1);
+    gpio_pin_set_dt(&led2, 1);
 }
 
 void iface_led_all_off(void)
 {
-    rx_led = 0;
-    tx_led = 0;
-    rec_led = 0;
-    dk_set_led(CON_STATUS_LED, 0);
-    dk_set_led(RUN_STATUS_LED, 0);
-    dk_set_led(REC_STATUS_LED, 0);
+    gpio_pin_set_dt(&led0, 0);
+    gpio_pin_set_dt(&led1, 0);
+    gpio_pin_set_dt(&led2, 0);
 }
 
 void iface_led_all_toggle(void)
 {
-    rx_led = !rx_led;
-    tx_led = !tx_led;
-    rec_led = !rec_led;
-    dk_set_led(CON_STATUS_LED, 0);
-    dk_set_led(RUN_STATUS_LED, 0);
-    dk_set_led(REC_STATUS_LED, 0);
+    gpio_pin_toggle_dt(&led0);
+    gpio_pin_toggle_dt(&led1);
+    gpio_pin_toggle_dt(&led2);
 }
 
 void iface_notify_enter_pairing(void)
 {
     uint16_t delay_ms = 250;
     uint8_t repeat = 2;
-    tx_led = 0;
 
     dk_set_led(RUN_STATUS_LED, 0);
 
@@ -113,9 +92,6 @@ void iface_notify_not_paired(void)
 void iface_notify_pairing_successful(void)
 {
     uint16_t delay_ms = 100;
-    rx_led = 0;
-    tx_led = 0;
-    rec_led = 0;
     
     iface_led_all_off();
     iface_delay(delay_ms);

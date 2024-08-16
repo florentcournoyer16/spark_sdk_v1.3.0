@@ -13,6 +13,7 @@
 #include "swc_api.h"
 #include "swc_cfg_coord.h"
 #include "swc_stats.h"
+#include "hw_cfg.h"
 #include <stdio.h>
 #include <zephyr/kernel.h>
 
@@ -41,23 +42,19 @@ static char rx_payload[MAX_PAYLOAD_SIZE_BYTE];
 static uint32_t tx_count;
 static bool print_stats_now;
 static bool reset_stats_now;
+static swc_error_t swc_err;
 
 /* PRIVATE FUNCTION PROTOTYPE *************************************************/
 static void app_swc_core_init(swc_error_t *err);
 static void conn_tx_success_callback(void *conn);
 static void conn_tx_fail_callback(void *conn);
 static void conn_rx_success_callback(void *conn);
-
 static void print_stats(void);
 static void reset_stats(void);
 
-/* PUBLIC FUNCTIONS ***********************************************************/
-extern void cortical_implant_routine(void)
-{
-    swc_error_t swc_err;
+void init_cortical_implant(void)
+{  
     swc_memory_pool_ptr = k_malloc(SWC_MEM_POOL_SIZE);
-    uint8_t str_counter = 0;
-    uint8_t *cortical_implant_buf = NULL;
 
     iface_board_init();
 
@@ -67,11 +64,17 @@ extern void cortical_implant_routine(void)
         while (1)
             ;
     }
-
-    swc_connect(&swc_err);
     printk("INIT : COORD Initialisation complete.\n");
-    
-    while (1)
+}
+/* PUBLIC FUNCTIONS ***********************************************************/
+extern void cortical_implant_routine(void)
+{
+    uint8_t str_counter = 0;
+    uint8_t *cortical_implant_buf = NULL;
+    pair_device();
+    print_stats_now = false;
+
+    while (!print_stats_now)
     {
         swc_connection_get_payload_buffer(tx_conn, &cortical_implant_buf, &swc_err);
         if (cortical_implant_buf != NULL)
@@ -80,24 +83,20 @@ extern void cortical_implant_routine(void)
 
             swc_connection_send(tx_conn, cortical_implant_buf, tx_payload_size + ENDING_NULL_CHARACTER_SIZE, &swc_err);
         }
-
-        /* Print received string and stats every 1000 transmissions */
-        if (print_stats_now)
-        {
-            if (reset_stats_now)
-            {
-                swc_connection_reset_stats(tx_conn);
-                swc_connection_reset_stats(rx_conn);
-                reset_stats_now = false;
-            }
-            else
-            {
-                iface_print_string(rx_payload);
-                print_stats();
-            }
-            print_stats_now = false;
-        }
     }
+    if (reset_stats_now)
+    {
+        swc_connection_reset_stats(tx_conn);
+        swc_connection_reset_stats(rx_conn);
+        reset_stats_now = false;
+    }
+    else
+    {
+        iface_print_string(rx_payload);
+        print_stats();
+    }
+
+    print_stats_now = false;
 }
 
 /* PRIVATE FUNCTIONS **********************************************************/
@@ -319,4 +318,27 @@ static void reset_stats(void)
     {
         reset_stats_now = true;
     }
+}
+
+void unpair_device(void)
+{
+    swc_disconnect(&swc_err);
+    if ((swc_err != SWC_ERR_NONE) && (swc_err != SWC_ERR_NOT_CONNECTED))
+    {
+        while (1)
+            ;
+    }
+
+    gpio_pin_set_dt(&led2, 0);
+}
+
+void pair_device(void)
+{
+    swc_connect(&swc_err);
+    if ((swc_err != SWC_ERR_NONE) && (swc_err != SWC_ERR_NOT_CONNECTED))
+    {
+        while (1)
+            ;
+    }
+    gpio_pin_set_dt(&led2, 1);
 }

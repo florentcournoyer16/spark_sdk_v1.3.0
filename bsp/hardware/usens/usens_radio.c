@@ -240,7 +240,7 @@ static void init_radio_spi_peripheral(void)
 		return;
 	}
 
-    gpio_pin_configure_dt(&uwb_cs_ctrl, GPIO_OUTPUT_INACTIVE);
+    gpio_pin_configure_dt(&uwb_cs_ctrl.gpio, GPIO_OUTPUT_INACTIVE);
 
     // TO VERIFY : Not sure about the  right config to set
     spi_conf.frequency = 30000000;
