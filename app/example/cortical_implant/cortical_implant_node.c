@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <zephyr/kernel.h>
+#include "hw_cfg.h"
 
 /* CONSTANTS ******************************************************************/
 /* More memory is needed when using dual radio. */
@@ -49,6 +50,7 @@ static char rx_payload[MAX_PAYLOAD_SIZE_BYTE];
 static uint32_t tx_count;
 static bool print_stats_now;
 static bool reset_stats_now;
+static swc_error_t swc_err;
 
 /* PRIVATE FUNCTION PROTOTYPE *************************************************/
 static void app_swc_core_init(swc_error_t *err);
@@ -58,6 +60,21 @@ static void conn_rx_success_callback(void *conn);
 
 static void print_stats(void);
 static void reset_stats(void);
+
+void init_cortical_implant(void)
+{  
+    swc_memory_pool_ptr = k_malloc(SWC_MEM_POOL_SIZE);
+
+    iface_board_init();
+
+    app_swc_core_init(&swc_err);
+    if (swc_err != SWC_ERR_NONE)
+    {
+        while (1)
+            ;
+    }
+    printk("INIT : NODE Initialisation complete.\n");
+}
 
 extern void cortical_implant_routine(void)
 {
@@ -326,4 +343,27 @@ static void reset_stats(void)
     {
         reset_stats_now = true;
     }
+}
+
+void unpair_device(void)
+{
+    swc_disconnect(&swc_err);
+    if ((swc_err != SWC_ERR_NONE) && (swc_err != SWC_ERR_NOT_CONNECTED))
+    {
+        while (1)
+            ;
+    }
+
+    gpio_pin_set_dt(&led2, 0);
+}
+
+void pair_device(void)
+{
+    swc_connect(&swc_err);
+    if ((swc_err != SWC_ERR_NONE) && (swc_err != SWC_ERR_NOT_CONNECTED))
+    {
+        while (1)
+            ;
+    }
+    gpio_pin_set_dt(&led2, 1);
 }

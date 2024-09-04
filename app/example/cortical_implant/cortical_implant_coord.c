@@ -340,5 +340,5 @@ void pair_device(void)
         while (1)
             ;
     }
-    gpio_pin_set_dt(&led2, 1);
+    gpio_pin_set_dt(&led2, 0);
 }
